@@ -1,7 +1,6 @@
 package burlap.visualizer;
 
 import burlap.mdp.core.state.State;
-
 import java.awt.*;
 
 
@@ -15,9 +14,9 @@ import java.awt.*;
  *
  */
 public interface StatePainter {
-	
-	
-	/** 
+
+
+	/**
 	 * Paints general state information not to graphics context g2
 	 * @param g2 graphics context to which the static data should be painted
 	 * @param s the state to be painted
