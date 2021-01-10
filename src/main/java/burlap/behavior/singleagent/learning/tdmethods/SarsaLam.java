@@ -32,7 +32,7 @@ import java.util.LinkedList;
  * {@link #setLearningRateFunction(burlap.behavior.learningrate.LearningRate)}.
  * <p>
  * @author James MacGlashan
- * 
+ *
  * <p>
  * 1. Rummery, Gavin A., and Mahesan Niranjan. On-line Q-learning using connectionist systems. University of Cambridge, Department of Engineering, 1994. <p>
  * 2. Sutton, Richard S., Doina Precup, and Satinder Singh. "Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning." Artificial intelligence 112.1 (1999): 181-211.
@@ -45,10 +45,10 @@ public class SarsaLam extends QLearning {
 	 * the strength of eligibility traces (0 for one step, 1 for full propagation)
 	 */
 	protected double				lambda;
-	
-	
+
+
 	/**
-	 * Initializes SARSA(\lambda) with 0.1 epsilon greedy policy, the same Q-value initialization everywhere, and places no limit on the number of steps the 
+	 * Initializes SARSA(\lambda) with 0.1 epsilon greedy policy, the same Q-value initialization everywhere, and places no limit on the number of steps the
 	 * agent can take in an episode. By default the agent will only save the last learning episode and a call to the {@link #planFromState(State)} method
 	 * will cause the valueFunction to use only one episode for planning; this should probably be changed to a much larger value if you plan on using this
 	 * algorithm as a planning algorithm.
@@ -61,13 +61,13 @@ public class SarsaLam extends QLearning {
 	 */
 	public SarsaLam(SADomain domain, double gamma, HashableStateFactory hashingFactory,
 					double qInit, double learningRate, double lambda) {
-		
+
 		super(domain, gamma, hashingFactory, qInit, learningRate);
 		this.sarsalamInit(lambda);
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Initializes SARSA(\lambda) with 0.1 epsilon greedy policy, the same Q-value initialization everywhere. By default the agent will only save the last learning episode and a call to the {@link #planFromState(State)} method
 	 * will cause the valueFunction to use only one episode for planning; this should probably be changed to a much larger value if you plan on using this
@@ -82,14 +82,14 @@ public class SarsaLam extends QLearning {
 	 */
 	public SarsaLam(SADomain domain, double gamma, HashableStateFactory hashingFactory,
 			double qInit, double learningRate, int maxEpisodeSize, double lambda) {
-		
+
 		super(domain, gamma, hashingFactory, qInit, learningRate, maxEpisodeSize);
 		this.sarsalamInit(lambda);
-		
+
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Initializes SARSA(\lambda) with the same Q-value initialization everywhere. Note that if the provided policy is derived from the Q-value of this learning agent (as it should be),
 	 * you may need to set the policy to point to this object after call this constructor; the constructor will not do this automatically in case it was by design
@@ -107,13 +107,13 @@ public class SarsaLam extends QLearning {
 	 */
 	public SarsaLam(SADomain domain, double gamma, HashableStateFactory hashingFactory,
 			double qInit, double learningRate, Policy learningPolicy, int maxEpisodeSize, double lambda) {
-		
+
 		super(domain, gamma, hashingFactory, qInit, learningRate, learningPolicy, maxEpisodeSize);
 		this.sarsalamInit(lambda);
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Initializes SARSA(\lambda). Note that if the provided policy is derived from the Q-value of this learning agent (as it should be),
 	 * you may need to set the policy to point to this object after call this constructor; the constructor will not do this automatically in case it was by design
@@ -131,12 +131,12 @@ public class SarsaLam extends QLearning {
 	 */
 	public SarsaLam(SADomain domain, double gamma, HashableStateFactory hashingFactory,
 					QFunction qInit, double learningRate, Policy learningPolicy, int maxEpisodeSize, double lambda) {
-		
+
 		super(domain, gamma, hashingFactory, qInit, learningRate, learningPolicy, maxEpisodeSize);
 		this.sarsalamInit(lambda);
 	}
-	
-	
+
+
 	protected void sarsalamInit(double lambda){
 		this.lambda = lambda;
 	}
@@ -254,40 +254,40 @@ public class SarsaLam extends QLearning {
 	}
 
 
-	
-	
-	
-	
-	
+
+
+
+
+
 	/**
 	 * A data structure for maintaining eligibility trace values
 	 * @author James MacGlashan
 	 *
 	 */
 	public static class EligibilityTrace{
-		
+
 		/**
 		 * The eligibility value
 		 */
 		public double					eligibility;
-		
+
 		/**
 		 * The state for this trace
 		 */
 		public HashableState sh;
-		
+
 		/**
 		 * The current Q-value info for this trace (contains the action reference)
 		 */
 		public QValue					q;
-		
+
 		/**
 		 * The initial numeric Q-value for this trace when it was created.
 		 */
 		public double					initialQ;
-		
-		
-		
+
+
+
 		/**
 		 * Creates a new eligibility trace to track for an episode.
 		 * @param sh the state of the trace
@@ -300,10 +300,10 @@ public class SarsaLam extends QLearning {
 			this.eligibility = elgigbility;
 			this.initialQ = q.q;
 		}
-		
-		
+
+
 	}
-	
-	
+
+
 
 }

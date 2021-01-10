@@ -26,7 +26,7 @@ public interface QProvider extends QFunction{
 	 * methods for computing the value function of a state, given the Q-values (the max Q-value or policy weighted value).
 	 */
 	class Helper {
-	    
+
 	    private Helper() {
 	        // do nothing
 	    }

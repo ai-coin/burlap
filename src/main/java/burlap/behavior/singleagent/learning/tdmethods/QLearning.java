@@ -74,7 +74,7 @@ public class QLearning extends MDPSolver implements QProvider, LearningAgent, Pl
    * The learning policy to use. Typically these will be policies that link back to this object so that they change as the Q-value estimate
    * change.
    */
-  protected Policy learningPolicy;
+  public Policy learningPolicy;
 
   /**
    * The maximum number of steps that will be taken in an episode before the agent terminates a learning episode
@@ -206,7 +206,7 @@ public class QLearning extends MDPSolver implements QProvider, LearningAgent, Pl
           QFunction qInitFunction, double learningRate, Policy learningPolicy, int maxEpisodeSize) {
 
     this.solverInit(domain, gamma, hashingFactory);
-    this.qFunction = new HashMap<HashableState, QLearningStateNode>();
+    this.qFunction = new HashMap<>();
     this.learningRate = new ConstantLR(learningRate);
     this.learningPolicy = learningPolicy;
     this.maxEpisodeSize = maxEpisodeSize;
@@ -376,13 +376,13 @@ public class QLearning extends MDPSolver implements QProvider, LearningAgent, Pl
   }
 
   /**
-   * Returns the maximum Q-value in the hashed stated.
+   * Returns the maximum Q-value in the hashed state.
    *
-   * @param s the state for which to get he maximum Q-value;
-   * @return the maximum Q-value in the hashed stated.
+   * @param state the state for which to get he maximum Q-value;
+   * @return the maximum Q-value in the hashed state.
    */
-  protected double getMaxQ(HashableState s) {
-    List<QValue> qs = this.getQs(s);
+  protected double getMaxQ(HashableState state) {
+    List<QValue> qs = this.getQs(state);
     double max = Double.NEGATIVE_INFINITY;
     for (QValue q : qs) {
       if (q.q > max) {
@@ -415,7 +415,6 @@ public class QLearning extends MDPSolver implements QProvider, LearningAgent, Pl
     } while (eCount < numEpisodesForPlanning && maxQChangeInLastEpisode > maxQChangeForPlanningTermination);
 
     return new GreedyQPolicy(this);
-
   }
 
   @Override
@@ -445,10 +444,18 @@ public class QLearning extends MDPSolver implements QProvider, LearningAgent, Pl
         if (visualExplorer != null) {
           // visualize the agent's actions in a grid world
           visualExplorer.executeAction(action);
-          try {
-            Thread.sleep(10);
-          } catch (InterruptedException ex) {
-            //ignore
+          if (learningPolicy instanceof GreedyQPolicy) {
+            try {
+              Thread.sleep(100);
+            } catch (InterruptedException ex) {
+              //ignore
+            }
+          } else {
+            try {
+              Thread.sleep(10);
+            } catch (InterruptedException ex) {
+              //ignore
+            }
           }
         }
 
@@ -478,21 +485,22 @@ public class QLearning extends MDPSolver implements QProvider, LearningAgent, Pl
       double oldQ = curQ.q;
 
       //update Q-value
-      curQ.q = curQ.q + this.learningRate.pollLearningRate(this.totalNumberOfSteps, curState.s(), action) * (r + (discount * maxQ) - curQ.q);
+      curQ.q = curQ.q + this.learningRate.pollLearningRate(
+              this.totalNumberOfSteps, // agentTime
+              curState.s(), // state
+              action)
+              * (r + (discount * maxQ) - curQ.q);
 
       double deltaQ = Math.abs(oldQ - curQ.q);
       if (deltaQ > maxQChangeInLastEpisode) {
         maxQChangeInLastEpisode = deltaQ;
       }
-
       //move on polling environment for its current state in case it changed during processing
       curState = this.stateHash(env.currentObservation());
       this.totalNumberOfSteps++;
-
     }
-
+    System.out.println(learningPolicy.getClass().getSimpleName() + " steps to termination: " + eStepCounter);
     return ea;
-
   }
 
   @Override

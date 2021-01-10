@@ -31,10 +31,10 @@ import java.util.List;
  * a temperature of 0.1 will be used. A different model can be provided in the constructor as well as the value function initialization used. The policy
  * followed may be set with a setter ({@link #setPolicy(burlap.behavior.policy.SolverDerivedPolicy)}). The Q-value assigned to state-action pairs for entirely untried
  * transitions is reported as that returned by the value function initializer provided. In general, value function initialization should always be optimistic.
- * 
- * 
+ *
+ *
  * 1. Barto, Andrew G., Steven J. Bradtke, and Satinder P. Singh. "Learning to act using real-time dynamic programming." Artificial Intelligence 72.1 (1995): 81-138.
- * 
+ *
  * @author James MacGlashan
  *
  */
@@ -44,85 +44,85 @@ public class ARTDP extends MDPSolver implements QProvider,LearningAgent{
 	 * The model of the world that is being learned.
 	 */
 	protected LearnedModel model;
-	
+
 	/**
 	 * The valueFunction used on the modeled world to update the value function
 	 */
 	protected DynamicProgramming 				modelPlanner;
-	
+
 	/**
 	 * the policy to follow
 	 */
 	protected Policy							policy;
-	
+
 	/**
 	 * the saved previous learning episodes
 	 */
 	protected LinkedList<Episode>		episodeHistory = new LinkedList<Episode>();
-	
-	
+
+
 	/**
 	 * The maximum number of learning steps per episode before the agent gives up
 	 */
 	protected int								maxNumSteps = Integer.MAX_VALUE;
-	
-	
+
+
 	/**
 	 * The number of the most recent learning episodes to store.
 	 */
 	protected int								numEpisodesToStore = 1;
-	
-	
-	
-	
+
+
+
+
 	/**
-	 * Initializes using a tabular model of the world and a Boltzmann policy with a fixed temperature of 0.1. 
+	 * Initializes using a tabular model of the world and a Boltzmann policy with a fixed temperature of 0.1.
 	 * @param domain the domain
 	 * @param gamma the discount factor
 	 * @param hashingFactory the state hashing factory to use for the tabular model and the planning
 	 * @param vInit the constant value function initialization to use; should be optimisitc.
 	 */
 	public ARTDP(SADomain domain, double gamma, HashableStateFactory hashingFactory, double vInit){
-		
+
 		this.solverInit(domain, gamma, hashingFactory);
-		
+
 		this.model = new TabularModel(domain, hashingFactory, 1);
-		
+
 		//initializing the value function planning mechanisms to use our model and not the real world
 		this.modelPlanner = new DynamicProgramming();
 		this.modelPlanner.DPPInit(domain, gamma, hashingFactory);
 		this.modelPlanner.setModel(this.model);
 		this.policy = new BoltzmannQPolicy(this, 0.1);
-		
-		
+
+
 	}
-	
-	
+
+
 	/**
-	 * Initializes using a tabular model of the world and a Boltzmann policy with a fixed temperature of 0.1. 
+	 * Initializes using a tabular model of the world and a Boltzmann policy with a fixed temperature of 0.1.
 	 * @param domain the domain
 	 * @param gamma the discount factor
 	 * @param hashingFactory the state hashing factory to use for the tabular model and the planning
 	 * @param vInit the value function initialization to use; should be optimisitc.
 	 */
 	public ARTDP(SADomain domain, double gamma, HashableStateFactory hashingFactory, ValueFunction vInit){
-		
+
 		this.solverInit(domain, gamma, hashingFactory);
-		
+
 		this.model = new TabularModel(domain, hashingFactory, 1);
-		
+
 		//initializing the value function planning mechanisms to use our model and not the real world
 		this.modelPlanner = new DynamicProgramming();
 		this.modelPlanner.DPPInit(domain, gamma, hashingFactory);
 		this.modelPlanner.setModel(this.model);
 		this.policy = new BoltzmannQPolicy(this, 0.1);
-		
-		
+
+
 	}
-	
-	
+
+
 	/**
-	 * Initializes using the provided model algorithm and a Boltzmann policy with a fixed temperature of 0.1. 
+	 * Initializes using the provided model algorithm and a Boltzmann policy with a fixed temperature of 0.1.
 	 * @param domain the domain
 	 * @param gamma the discount factor
 	 * @param hashingFactory the state hashing factory to use for the tabular model and the planning
@@ -130,20 +130,20 @@ public class ARTDP extends MDPSolver implements QProvider,LearningAgent{
 	 * @param vInit the constant value function initialization to use; should be optimisitc.
 	 */
 	public ARTDP(SADomain domain, double gamma, HashableStateFactory hashingFactory, LearnedModel model, ValueFunction vInit){
-		
+
 		this.solverInit(domain, gamma, hashingFactory);
-		
+
 		this.model = model;
-		
+
 		//initializing the value function planning mechanisms to use our model and not the real world
 		this.modelPlanner = new DynamicProgramming();
 		this.modelPlanner.DPPInit(domain, gamma, hashingFactory);
 		this.policy = new BoltzmannQPolicy(this, 0.1);
-		
-		
+
+
 	}
 
-	
+
 	/**
 	 * Sets the policy to the provided one. Should be a policy that operates on a {@link QProvider}. Will automatically set its
 	 * Q-source to this object.
@@ -152,7 +152,7 @@ public class ARTDP extends MDPSolver implements QProvider,LearningAgent{
 	public void setPolicy(SolverDerivedPolicy policy){
 		this.policy = (Policy)policy;
 		policy.setSolver(this);
-		
+
 	}
 
 
@@ -208,7 +208,7 @@ public class ARTDP extends MDPSolver implements QProvider,LearningAgent{
 		return episodeHistory;
 	}
 
-	
+
 	@Override
 	public List<QValue> qValues(State s) {
 		List<QValue> qs = this.modelPlanner.qValues(s);
@@ -229,7 +229,7 @@ public class ARTDP extends MDPSolver implements QProvider,LearningAgent{
 
 	@Override
 	public double qValue(State s, Action a) {
-		
+
 		double q = this.modelPlanner.qValue(s, a);
 
 		if(this.model instanceof KWIKModel){
@@ -247,13 +247,13 @@ public class ARTDP extends MDPSolver implements QProvider,LearningAgent{
 	public double value(State s) {
 		return this.modelPlanner.value(s);
 	}
-	
+
 	public void resetSolver(){
 		this.model.resetModel();
 		this.modelPlanner.resetSolver();
 		this.episodeHistory.clear();
 	}
 
-	
+
 
 }

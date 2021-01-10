@@ -138,7 +138,7 @@ public class GridWorldVisualizer {
       float domainXScale = this.dwidth;
       float domainYScale = this.dheight;
 
-      //determine then normalized width
+      //determine the normalized width
       float width = (1.0f / domainXScale) * cWidth;
       float height = (1.0f / domainYScale) * cHeight;
 

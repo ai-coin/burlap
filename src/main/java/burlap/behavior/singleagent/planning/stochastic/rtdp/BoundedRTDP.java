@@ -37,22 +37,22 @@ import java.util.*;
  * the method {@link #setStateSelectionMode(StateSelectionMode)}. Another optional state selection mode is to always choose the next state
  * with the highest uncertainty, but this tends to be even slower due to being overly conservative so it is not reccommended in genral.
  * See the {@link StateSelectionMode} documentation for more information.
- * 
- * 
- * 
+ *
+ *
+ *
  * <p>
- * 1.McMahan, H. Brendan, Maxim Likhachev, and Geoffrey J. Gordon. "Bounded real-time dynamic programming: RTDP with monotone upper bounds and performance guarantees." 
+ * 1.McMahan, H. Brendan, Maxim Likhachev, and Geoffrey J. Gordon. "Bounded real-time dynamic programming: RTDP with monotone upper bounds and performance guarantees."
  * Proceedings of the 22nd international conference on Machine learning. ACM, 2005.
  * <p>
  * 2. Barto, Andrew G., Steven J. Bradtke, and Satinder P. Singh. "Learning to act using real-time dynamic programming." Artificial Intelligence 72.1 (1995): 81-138.
- * 
- * 
+ *
+ *
  * @author James MacGlashan
  *
  */
 public class BoundedRTDP extends DynamicProgramming implements Planner {
 
-	
+
 	/**
 	 * The different ways that states can be selected for expansion. That is, after an action is selected in the rollout,
 	 * the next state from the possible outcome states may be selected in these different ways. The default, and reccomended mode
@@ -74,87 +74,87 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	public static enum StateSelectionMode{
 		MODELBASED, WEIGHTEDMARGIN, MAXMARGIN
 	}
-	
-	
+
+
 	/**
 	 * The lower bound value function
 	 */
 	protected Map<HashableState, Double>		lowerBoundV = new HashMap<HashableState, Double>();
-	
+
 	/**
 	 * The upperbound value function
 	 */
 	protected Map<HashableState, Double>		upperBoundV = new HashMap<HashableState, Double>();
-	
-	
+
+
 	/**
 	 * The lowerbound value function initialization
 	 */
 	protected ValueFunction lowerVInit;
-	
+
 	/**
 	 * The upperbound value function initialization
 	 */
 	protected ValueFunction		upperVInit;
-	
+
 	/**
 	 * the max number of rollouts to perform when planning is started unless the value function margin is small enough. If
 	 * set to -1, then there is no limit.
 	 */
 	protected int								maxRollouts = -1;
-	
+
 	/**
 	 * The max permitted difference between the lower bound and upperbound for planning termination.
 	 */
 	protected double							maxDiff;
-	
-	
+
+
 	/**
 	 * The maximum depth/length of a rollout before it is terminated and Bellman updates are performed. If set to -1
 	 * then there is no limit; the default is -1.
 	 */
 	protected int								maxDepth = -1;
-	
-	
+
+
 	/**
 	 * Whether the current {@link burlap.behavior.singleagent.planning.stochastic.DynamicProgramming} valueFunction reference points to the lower bound value function or the upper bound value function.
 	 * If true, then it points to the lower bound; if false then to the upper bound.
 	 */
 	protected boolean							currentValueFunctionIsLower = false;
-	
-	
+
+
 	/**
 	 * Sets what the {@link burlap.behavior.singleagent.planning.stochastic.DynamicProgramming} valueFunction reference points to (the lower bound or upperbound) once a planning rollout is complete.
 	 * If true, then it points to the lower bound; if false then the upper bound. Pointing to the lower bound is default and provides any-time planning
 	 * performance.
 	 */
 	protected boolean							defaultToLowerValueAfterPlanning = true;
-	
+
 	/**
 	 * Which state selection mode is used. Refer to the {@link StateSelectionMode} documentation for more information on the modes. The default is MODELBASED.
 	 */
 	protected StateSelectionMode				selectionMode = StateSelectionMode.MODELBASED;
-	
+
 	/**
 	 * Keeps track of the number of Bellman updates that have been performed across all planning.
 	 */
 	protected int								numBellmanUpdates = 0;
-	
-	
+
+
 	/**
 	 * Keeps track of the number of rollout steps that have been performed across all planning rollouts.
 	 */
 	protected int								numSteps = 0;
-	
-	
+
+
 	/**
 	 * Whether each rollout should be run in reverse after completion. This is useful in goal-directed MDPs because it backups the goal reward to the initial state.
 	 * The default is true.
 	 */
 	protected boolean							runRolloutsInReverse = true;
-	
-	
-	
+
+
+
 	/**
 	 * Initializes.
 	 * @param domain the domain in which to plan
@@ -188,7 +188,7 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	public void setMaxNumberOfRollouts(int numRollouts){
 		this.maxRollouts = numRollouts;
 	}
-	
+
 	/**
 	 * Sets the maximum rollout depth of any rollout. If set to -1, then there is no limit on rollout depth.
 	 * @param maxDepth the maximum rollout depth of any rollout. If set to -1, then there is no limit on rollout depth.
@@ -196,16 +196,16 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	public void setMaxRolloutDepth(int maxDepth){
 		this.maxDepth = maxDepth;
 	}
-	
+
 	/**
-	 * Sets the max permitted difference in value function margin to permit planning termination. 
+	 * Sets the max permitted difference in value function margin to permit planning termination.
 	 * This value is also used to prematurely stop a rollout if the next state's margin is under this value.
 	 * @param maxDiff the max permitted difference in value function margin to permit planning termination.
 	 */
 	public void setMaxDifference(double maxDiff){
 		this.maxDiff = maxDiff;
 	}
-	
+
 	/**
 	 * Sets the state selection mode used when choosing next states to expand. See the {@link StateSelectionMode} documentation for more information on the modes.
 	 * @param selectionMode the state selection mode to use.
@@ -213,7 +213,7 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	public void setStateSelectionMode(StateSelectionMode selectionMode){
 		this.selectionMode = selectionMode;
 	}
-	
+
 	/**
 	 * Use this method to set which value function--the lower bound or upper bound--to use after a planning rollout is complete. Setting this
 	 * value affects which values the {@link #value(State)}, {@link #qValues(State)}, and {@link #qValue(State, Action)} methods returns.
@@ -223,7 +223,7 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	public void setDefaultValueFunctionAfterARollout(boolean useLowerBound){
 		this.defaultToLowerValueAfterPlanning = useLowerBound;
 	}
-	
+
 	/**
 	 * Sets whether each rollout should be run in reverse after completion. This is useful in goal-directed MDPs because it backups the goal reward to the initial state.
 	 * @param runRolloutsInRevers if true, then rollouts will be run in reverse. If false, then they will not be run in reverse.
@@ -242,20 +242,20 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	 */
 	@Override
 	public GreedyQPolicy planFromState(State initialState) {
-	
+
 		DPrint.cl(this.debugCode, "Beginning Planning.");
 		int nr = 0;
 		while(this.runRollout(initialState) > this.maxDiff && (nr < this.maxRollouts || this.maxRollouts == -1)){
 			nr++;
 		}
-		
-		
+
+
 		DPrint.cl(this.debugCode, "Finished planning with a total of " + this.numBellmanUpdates + " backups.");
 
 		return new GreedyQPolicy(this);
 
 	}
-	
+
 	/**
 	 * Sets the value function to use to be the upper bound.
 	 */
@@ -264,8 +264,8 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 		this.valueInitializer = this.upperVInit;
 		this.currentValueFunctionIsLower = false;
 	}
-	
-	
+
+
 	/**
 	 * Sets the value function to use to be the lower bound.
 	 */
@@ -274,7 +274,7 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 		this.valueInitializer = this.lowerVInit;
 		this.currentValueFunctionIsLower = true;
 	}
-	
+
 	/**
 	 * Returns the total number of Bellman updates across all planning
 	 * @return the total number of Bellman updates across all planning
@@ -282,7 +282,7 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	public int getNumberOfBellmanUpdates(){
 		return this.numBellmanUpdates;
 	}
-	
+
 	/**
 	 * Returns the total number of planning steps that have been performed.
 	 * @return the total number of planning steps that have been performed.
@@ -290,8 +290,8 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	public int getNumberOfSteps(){
 		return this.numSteps;
 	}
-	
-	
+
+
 	/**
 	 * Runs a planning rollout from the provided state.
 	 * @param s the initial state from which a planning rollout should be performed.
@@ -299,44 +299,44 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	 */
 	public double runRollout(State s){
 		LinkedList<HashableState> trajectory = new LinkedList<HashableState>();
-		
+
 		HashableState csh = this.hashingFactory.hashState(s);
-		
+
 		while(!model.terminal(csh.s()) && (trajectory.size() < this.maxDepth+1 || this.maxDepth == -1)){
-			
+
 			if(this.runRolloutsInReverse){
 				trajectory.offerFirst(csh);
 			}
-			
+
 			this.setValueFunctionToLowerBound();
 			QValue mxL = this.maxQ(csh.s());
 			this.lowerBoundV.put(csh, mxL.q);
-			
+
 			this.setValueFunctionToUpperBound();
 			QValue mxU = this.maxQ(csh.s());
 			this.upperBoundV.put(csh, mxU.q);
-			
+
 			numBellmanUpdates += 2;
 			this.numSteps++;
-			
+
 			StateSelectionAndExpectedGap select = this.getNextState(csh.s(), mxU.a);
 			csh = select.sh;
-			
+
 			if(select.expectedGap < this.maxDiff){
 				break;
 			}
-			
-			
+
+
 		}
-		
+
 		if(model.terminal(csh.s())){
 			this.lowerBoundV.put(csh, 0.);
 			this.upperBoundV.put(csh, 0.);
 		}
-		
-		
+
+
 		double lastGap = 0.;
-		
+
 		//run in reverse
 		if(this.runRolloutsInReverse){
 			while(!trajectory.isEmpty()){
@@ -344,32 +344,32 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 				this.setValueFunctionToLowerBound();
 				QValue mxL = this.maxQ(sh.s());
 				this.lowerBoundV.put(sh, mxL.q);
-				
+
 				this.setValueFunctionToUpperBound();
 				QValue mxU = this.maxQ(sh.s());
 				this.upperBoundV.put(sh, mxU.q);
-				
+
 				numBellmanUpdates += 2;
 				lastGap = mxU.q - mxL.q;
-				
+
 			}
 		}
 		else{
 			lastGap = this.getGap(this.hashingFactory.hashState(s));
 		}
-		
-		
+
+
 		if(this.defaultToLowerValueAfterPlanning){
 			this.setValueFunctionToLowerBound();
 		}
 		else{
 			this.setValueFunctionToUpperBound();
 		}
-		
+
 		return lastGap;
-		
+
 	}
-	
+
 	/**
 	 * Selects a next state for expansion when action a is applied in state s.
 	 * @param s the source state of the transition
@@ -377,7 +377,7 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	 * @return a {@link StateSelectionAndExpectedGap} object holding the next state to be expanded and the expected margin size of this transition.
 	 */
 	protected StateSelectionAndExpectedGap getNextState(State s, Action a){
-		
+
 		if(this.selectionMode == StateSelectionMode.MODELBASED){
 			HashableState nsh =  this.hashingFactory.hashState(model.sample(s, a).op);
 			double gap = this.getGap(nsh);
@@ -391,8 +391,8 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 		}
 		throw new RuntimeException("Unknown state selection mode.");
 	}
-	
-	
+
+
 	/**
 	 * Selects a next state for expansion when action a is applied in state s according to the next possible state that has the largest lower and upper bound margin.
 	 * Ties are broken randomly.
@@ -401,7 +401,7 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 	 * @return a {@link StateSelectionAndExpectedGap} object holding the next state to be expanded and the expected margin size of this transition.
 	 */
 	protected StateSelectionAndExpectedGap getNextStateByMaxMargin(State s, Action a){
-		
+
 		List<TransitionProb> tps = ((FullModel)model).transitions(s, a);
 		double sum = 0.;
 		double maxGap = Double.NEGATIVE_INFINITY;
@@ -419,14 +419,14 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 				maxGap = gap;
 			}
 		}
-		
+
 		int rint = RandomFactory.getMapped(0).nextInt(maxStates.size());
 		StateSelectionAndExpectedGap select = new StateSelectionAndExpectedGap(maxStates.get(rint), sum);
-		
+
 		return select;
 	}
-	
-	
+
+
 	/**
 	 * Selects a next state for expansion when action a is applied in state s by randomly sampling from the transition dynamics weighted by the margin of the lower and
 	 * upper bound value functions.
@@ -448,7 +448,7 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 			weightedGap[i] = tp.p*gap;
 			sum += weightedGap[i];
 		}
-		
+
 		double roll = RandomFactory.getMapped(0).nextDouble();
 		double cumSum = 0.;
 		for(int i = 0; i < weightedGap.length; i++){
@@ -458,12 +458,12 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 				return select;
 			}
 		}
-		
+
 		throw new RuntimeException("Error: probabilities in state selection did not sum to 1.");
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Returns the lower bound and upper bound value function margin/gap for the given state
 	 * @param sh the state whose margin should be returned.
@@ -477,19 +477,19 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 		double gap = u-l;
 		return gap;
 	}
-	
-	
+
+
 	/**
-	 * Returns the maximum Q-value entry for the given state with ties broken randomly. 
+	 * Returns the maximum Q-value entry for the given state with ties broken randomly.
 	 * @param s the query state for the Q-value
-	 * @return the maximum Q-value entry for the given state with ties broken randomly. 
+	 * @return the maximum Q-value entry for the given state with ties broken randomly.
 	 */
 	protected QValue maxQ(State s){
-		
+
 		List<QValue> qs = this.qValues(s);
 		double max = Double.NEGATIVE_INFINITY;
 		List<QValue> maxQs = new ArrayList<QValue>(qs.size());
-		
+
 		for(QValue q : qs){
 			if(q.q == max){
 				maxQs.add(q);
@@ -500,32 +500,32 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 				maxQs.add(q);
 			}
 		}
-		
+
 		//return random max
 		int rint = RandomFactory.getMapped(0).nextInt(maxQs.size());
-		
+
 		return maxQs.get(rint);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * A tuple class for a hashed state and the expected value function margin/gap of a the source transition.
 	 * @author James MacGlashan
 	 *
 	 */
 	protected static class StateSelectionAndExpectedGap{
-		
+
 		/**
 		 * The selected state
 		 */
 		public HashableState sh;
-		
+
 		/**
 		 * The expected margin/gap of the value function from the source transition
 		 */
 		public double expectedGap;
-		
+
 		/**
 		 * Initializes.
 		 * @param sh The selected state
@@ -535,9 +535,9 @@ public class BoundedRTDP extends DynamicProgramming implements Planner {
 			this.sh = sh;
 			this.expectedGap = expectedGap;
 		}
-		
+
 	}
-	
-	
+
+
 
 }

@@ -1,8 +1,11 @@
 package burlap.behavior.singleagent.auxiliary.performance;
 
+import burlap.behavior.policy.GreedyQPolicy;
+import burlap.behavior.policy.Policy;
 import burlap.behavior.singleagent.Episode;
 import burlap.behavior.singleagent.learning.LearningAgent;
 import burlap.behavior.singleagent.learning.LearningAgentFactory;
+import burlap.behavior.singleagent.learning.tdmethods.QLearning;
 import burlap.debugtools.DPrint;
 import burlap.mdp.singleagent.environment.Environment;
 import burlap.mdp.singleagent.environment.extensions.EnvironmentServer;
@@ -100,7 +103,6 @@ public class LearningAlgorithmExperimenter {
 
   // the optional visual explorer for the grid world
   public static VisualExplorer visualExplorer = null;
-
 
   /**
    * Initializes. The trialLength will be interpreted as the number of episodes, but it can be reinterpreted as a total number of steps per
@@ -313,6 +315,18 @@ public class LearningAlgorithmExperimenter {
       if (visualExplorer != null) {
         visualExplorer.init();
       }
+//      if (agent instanceof QLearning) {
+//        final QLearning qLearning = (QLearning) agent;
+//        final Policy learningPolicy = qLearning.learningPolicy;
+//        qLearning.setLearningPolicy(new GreedyQPolicy(qLearning));
+//
+//        agent.runLearningEpisode(this.environmentSever);
+//
+//        qLearning.setLearningPolicy(learningPolicy);
+//        this.plotter.endEpisode();
+//        this.environmentSever.resetEnvironment();
+//        visualExplorer.init();
+//      }
     }
 
     this.plotter.endTrial();

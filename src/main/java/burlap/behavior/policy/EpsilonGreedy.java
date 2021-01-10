@@ -27,8 +27,8 @@ public class EpsilonGreedy implements SolverDerivedPolicy, EnumerablePolicy {
 	protected QProvider qplanner;
 	protected double					epsilon;
 	protected Random 					rand;
-	
-	
+
+
 	/**
 	 * Initializes with the value of epsilon, where epsilon is the probability of taking a random action.
 	 * @param epsilon the probability of taking a random action.
@@ -38,7 +38,7 @@ public class EpsilonGreedy implements SolverDerivedPolicy, EnumerablePolicy {
 		this.epsilon = epsilon;
 		rand = RandomFactory.getMapped(0);
 	}
-	
+
 	/**
 	 * Initializes with the QComputablePlanner to use and the value of epsilon to use, where epsilon is the probability of taking a random action.
 	 * @param planner the QComputablePlanner to use
@@ -50,7 +50,7 @@ public class EpsilonGreedy implements SolverDerivedPolicy, EnumerablePolicy {
 		rand = RandomFactory.getMapped(0);
 	}
 
-	
+
 	/**
 	 * Returns the epsilon value, where epsilon is the probability of taking a random action.
 	 * @return the epsilon value
@@ -69,29 +69,29 @@ public class EpsilonGreedy implements SolverDerivedPolicy, EnumerablePolicy {
 
 	@Override
 	public void setSolver(MDPSolverInterface solver){
-		
+
 		if(!(solver instanceof QProvider)){
 			throw new RuntimeErrorException(new Error("Planner is not a QComputablePlanner"));
 		}
-		
+
 		this.qplanner = (QProvider) solver;
 	}
-	
+
 	@Override
 	public Action action(State s) {
-		
-		
+
+
 		List<QValue> qValues = this.qplanner.qValues(s);
-		
-		
+
+
 		double roll = rand.nextDouble();
 		if(roll <= epsilon){
 			int selected = rand.nextInt(qValues.size());
 			Action ga = qValues.get(selected).a;
 			return ga;
 		}
-		
-		
+
+
 		List <QValue> maxActions = new ArrayList<QValue>();
 		maxActions.add(qValues.get(0));
 		double maxQ = qValues.get(0).q;
@@ -119,9 +119,9 @@ public class EpsilonGreedy implements SolverDerivedPolicy, EnumerablePolicy {
 
 	@Override
 	public List<ActionProb> policyDistribution(State s) {
-		
+
 		List<QValue> qValues = this.qplanner.qValues(s);
-		
+
 		List <ActionProb> dist = new ArrayList<ActionProb>(qValues.size());
 		double maxQ = Double.NEGATIVE_INFINITY;
 		int nMax = 0;
@@ -142,12 +142,12 @@ public class EpsilonGreedy implements SolverDerivedPolicy, EnumerablePolicy {
 				dist.get(i).pSelection += (1. - this.epsilon) / nMax;
 			}
 		}
-		
-		
+
+
 		return dist;
 	}
 
-	
+
 	@Override
 	public boolean definedFor(State s) {
 		return true; //can always find q-values with default value

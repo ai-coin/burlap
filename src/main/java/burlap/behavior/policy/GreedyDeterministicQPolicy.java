@@ -19,11 +19,11 @@ import java.util.List;
 public class GreedyDeterministicQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
 
 	protected QProvider qplanner;
-	
+
 	public GreedyDeterministicQPolicy() {
 		qplanner = null;
 	}
-	
+
 	/**
 	 * Initializes with a QComputablePlanner
 	 * @param qplanner the QComputablePlanner to use
@@ -31,21 +31,21 @@ public class GreedyDeterministicQPolicy implements SolverDerivedPolicy, Enumerab
 	public GreedyDeterministicQPolicy(QProvider qplanner){
 		this.qplanner = qplanner;
 	}
-	
+
 	@Override
 	public void setSolver(MDPSolverInterface solver){
-		
+
 		if(!(solver instanceof QProvider)){
 			throw new RuntimeErrorException(new Error("Planner is not a QComputablePlanner"));
 		}
-		
+
 		this.qplanner = (QProvider) solver;
 	}
-	
+
 
 	@Override
 	public Action action(State s) {
-		
+
 		List<QValue> qValues = this.qplanner.qValues(s);
 		double maxQV = Double.NEGATIVE_INFINITY;
 		QValue maxQ = null;
@@ -55,7 +55,7 @@ public class GreedyDeterministicQPolicy implements SolverDerivedPolicy, Enumerab
 				maxQ = q;
 			}
 		}
-		
+
 		return maxQ.a;
 	}
 
@@ -72,7 +72,7 @@ public class GreedyDeterministicQPolicy implements SolverDerivedPolicy, Enumerab
 		return PolicyUtils.deterministicPolicyDistribution(this, s);
 	}
 
-	
+
 	@Override
 	public boolean definedFor(State s) {
 		return true; //can always find q-values with default value

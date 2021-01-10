@@ -24,8 +24,8 @@ public class BoltzmannQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
 
 	protected QProvider qplanner;
 	double								temperature;
-	
-	
+
+
 	/**
 	 * Initializes with a temperature value. The temperature value controls how greedy the Boltzmann distribution is.
 	 * The temperature should be positive with values near zero causing the distribution to be more greedy. A high temperature
@@ -36,8 +36,8 @@ public class BoltzmannQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
 		this.qplanner = null;
 		this.temperature = temperature;
 	}
-	
-	
+
+
 	/**
 	 * Initializes with a temperature value and the QComputable valueFunction to use. The temperature value controls how greedy the Boltzmann distribution is.
 	 * The temperature should be positive with values near zero causing the distribution to be more greedy. A high temperature
@@ -49,7 +49,7 @@ public class BoltzmannQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
 		this.qplanner = planner;
 		this.temperature = temperature;
 	}
-	
+
 	@Override
 	public Action action(State s) {
 		return PolicyUtils.sampleFromActionDistribution(this, s);
@@ -66,17 +66,17 @@ public class BoltzmannQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
 		return this.getActionDistributionForQValues(s, qValues);
 	}
 
-	
-	
+
+
 	private List<ActionProb> getActionDistributionForQValues(State queryState, List <QValue> qValues){
-		
+
 		List <ActionProb> res = new ArrayList<ActionProb>();
-		
+
 		double [] rawQs = new double[qValues.size()];
 		for(int i = 0; i < qValues.size(); i++){
 			rawQs[i] = qValues.get(i).q;
 		}
-		
+
 		BoltzmannDistribution bd = new BoltzmannDistribution(rawQs, this.temperature);
 		double [] probs = bd.getProbabilities();
 		for(int i = 0; i < qValues.size(); i++){
@@ -84,7 +84,7 @@ public class BoltzmannQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
 			ActionProb ap = new ActionProb(q.a, probs[i]);
 			res.add(ap);
 		}
-		
+
 		return res;
 	}
 
@@ -94,9 +94,9 @@ public class BoltzmannQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
 		if(!(solver instanceof QProvider)){
 			throw new RuntimeErrorException(new Error("Planner is not a QComputablePlanner"));
 		}
-		
+
 		this.qplanner = (QProvider) solver;
-		
+
 	}
 
 
@@ -104,6 +104,6 @@ public class BoltzmannQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
 	public boolean definedFor(State s) {
 		return true; //can always find q-values with default value
 	}
-	
+
 
 }
