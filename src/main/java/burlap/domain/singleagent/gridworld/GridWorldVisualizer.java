@@ -1,5 +1,8 @@
 package burlap.domain.singleagent.gridworld;
 
+import burlap.behavior.singleagent.learning.LearningAgent;
+import burlap.behavior.singleagent.learning.tdmethods.QLearning;
+import burlap.behavior.valuefunction.QValue;
 import static burlap.domain.singleagent.gridworld.GridWorldDomain.*;
 import burlap.mdp.core.Domain;
 import burlap.mdp.core.oo.state.OOState;
@@ -20,6 +23,9 @@ import java.util.List;
  *
  */
 public class GridWorldVisualizer {
+
+  // dependency inserted by PlotTest in order to visualize the Q-values
+  public static QLearning qLearning;
 
   private GridWorldVisualizer() {
     // do nothing
@@ -75,7 +81,7 @@ public class GridWorldVisualizer {
     r.addStatePainter(new MapPainter(map));
     OOStatePainter oopainter = new OOStatePainter();
     oopainter.addObjectClassPainter(GridWorldDomain.CLASS_LOCATION, new LocationPainter(map));
-    oopainter.addObjectClassPainter(GridWorldDomain.CLASS_AGENT, new CellPainter(1, Color.gray, map));
+    oopainter.addObjectClassPainter(GridWorldDomain.CLASS_AGENT, new CellPainter(1, Color.cyan, map));
     r.addStatePainter(oopainter);
 
     return r;
@@ -96,7 +102,7 @@ public class GridWorldVisualizer {
     r.addStatePainter(new MapPainter(map));
     OOStatePainter oopainter = new OOStatePainter();
     oopainter.addObjectClassPainter(GridWorldDomain.CLASS_LOCATION, new LocationPainter(map));
-    oopainter.addObjectClassPainter(GridWorldDomain.CLASS_AGENT, new CellPainter(1, Color.gray, map));
+    oopainter.addObjectClassPainter(GridWorldDomain.CLASS_AGENT, new CellPainter(1, Color.cyan, map));
     r.addStatePainter(oopainter);
 
     return r;
@@ -173,6 +179,13 @@ public class GridWorldVisualizer {
           }
           if (drawEastWall) {
             g2.drawLine((int) (left + width), top, (int) (left + width), (int) (top + height));
+          }
+
+          if (qLearning != null && this.map[i][j] == 0) {
+            final List<QValue> qValues = qLearning.qValues(state);
+            for (final QValue qValue : qValues) {
+              System.out.println("x: " + i + ", y: " + j + ", action: " + qValue.a + ", " + qValue.q);
+            }
           }
 
         }
@@ -274,7 +287,7 @@ public class GridWorldVisualizer {
       this.dwidth = map.length;
       this.dheight = map[0].length;
       this.map = map;
-      this.baseColors = new ArrayList<Color>(5);
+      this.baseColors = new ArrayList<>(5);
       this.baseColors.add(Color.blue);
       this.baseColors.add(Color.red);
       this.baseColors.add(Color.green);
@@ -308,9 +321,6 @@ public class GridWorldVisualizer {
       float ry = cHeight - height - (Integer) ob.get(VAR_Y) * height;
 
       g2.fill(new Rectangle2D.Float(rx, ry, width, height));
-
     }
-
   }
-
 }

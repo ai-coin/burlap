@@ -64,9 +64,15 @@ public class GreedyQPolicy implements SolverDerivedPolicy, EnumerablePolicy {
         maxQ = q.q;
       }
     }
-    int selected = rand.nextInt(maxActions.size());
-    Action srcA = maxActions.get(selected).a;
-    return srcA;
+    if (maxActions.size() == 1) {
+      // return the action with the maximum quality
+      return maxActions.get(0).a;
+    } else {
+      // return a randomly selected action from those having the same maximum quality
+      int selected = rand.nextInt(maxActions.size());
+      Action srcA = maxActions.get(selected).a;
+      return srcA;
+    }
   }
 
   @Override

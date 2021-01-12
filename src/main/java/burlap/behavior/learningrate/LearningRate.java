@@ -53,7 +53,7 @@ public interface LearningRate {
   public double pollLearningRate(int agentTime, int featureId);
 
   /**
-   * Causes any learnign rate decay to reset to where it started.
+   * Causes any learning rate decay to reset to where it started.
    */
   public void resetDecay();
 

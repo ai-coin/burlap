@@ -7,6 +7,7 @@ import burlap.behavior.singleagent.learning.LearningAgent;
 import burlap.behavior.singleagent.learning.LearningAgentFactory;
 import burlap.behavior.singleagent.learning.tdmethods.QLearning;
 import burlap.debugtools.DPrint;
+import burlap.domain.singleagent.gridworld.GridWorldVisualizer;
 import burlap.mdp.singleagent.environment.Environment;
 import burlap.mdp.singleagent.environment.extensions.EnvironmentServer;
 import burlap.shell.visual.VisualExplorer;
@@ -302,6 +303,9 @@ public class LearningAlgorithmExperimenter {
     this.plotter.toggleDataCollection(false);
 
     LearningAgent agent = agentFactory.generateAgent();
+    if (agent instanceof QLearning) {
+      GridWorldVisualizer.qLearning = (QLearning) agent;
+    }
 
     this.plotter.toggleDataCollection(true); //turn it back on to begin
 
@@ -315,18 +319,18 @@ public class LearningAlgorithmExperimenter {
       if (visualExplorer != null) {
         visualExplorer.init();
       }
-//      if (agent instanceof QLearning) {
-//        final QLearning qLearning = (QLearning) agent;
-//        final Policy learningPolicy = qLearning.learningPolicy;
-//        qLearning.setLearningPolicy(new GreedyQPolicy(qLearning));
-//
-//        agent.runLearningEpisode(this.environmentSever);
-//
-//        qLearning.setLearningPolicy(learningPolicy);
-//        this.plotter.endEpisode();
-//        this.environmentSever.resetEnvironment();
-//        visualExplorer.init();
-//      }
+      if (agent instanceof QLearning) {
+        final QLearning qLearning = (QLearning) agent;
+        final Policy learningPolicy = qLearning.learningPolicy;
+        qLearning.setLearningPolicy(new GreedyQPolicy(qLearning));
+
+        agent.runLearningEpisode(this.environmentSever);
+
+        qLearning.setLearningPolicy(learningPolicy);
+        this.plotter.endEpisode();
+        this.environmentSever.resetEnvironment();
+        visualExplorer.init();
+      }
     }
 
     this.plotter.endTrial();

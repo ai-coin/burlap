@@ -11,7 +11,7 @@ import java.awt.*;
  * The {@link StateRenderLayer} instance provides 2D visualization of states by being provided a set of classes that can paint
  * ObjectInstances to the canvas as well as classes that can paint general domain information. Painters for object classes as well as
  * specific object instances can be provided. If there is a painter for an object class and a painter for a specific object instance of that
- * same class, then the specific object instance painter will be used to pain that object instead of the painter for that instance's OO-MDP
+ * same class, then the specific object instance painter will be used to paint that object instead of the painter for that instance's OO-MDP
  * class.
  *
  * @author James MacGlashan
