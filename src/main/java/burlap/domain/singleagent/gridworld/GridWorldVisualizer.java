@@ -1,19 +1,26 @@
 package burlap.domain.singleagent.gridworld;
 
-import burlap.behavior.singleagent.learning.LearningAgent;
 import burlap.behavior.singleagent.learning.tdmethods.QLearning;
 import burlap.behavior.valuefunction.QValue;
 import static burlap.domain.singleagent.gridworld.GridWorldDomain.*;
+import burlap.domain.singleagent.gridworld.state.GridAgent;
+import burlap.domain.singleagent.gridworld.state.GridLocation;
+import burlap.domain.singleagent.gridworld.state.GridWorldState;
 import burlap.mdp.core.Domain;
 import burlap.mdp.core.oo.state.OOState;
 import burlap.mdp.core.oo.state.ObjectInstance;
 import burlap.mdp.core.state.State;
+import burlap.statehashing.simple.SimpleHashableStateFactory;
 import burlap.visualizer.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.ImageIO;
 
 /**
  * Returns a visualizer for grid worlds in which walls are rendered as black squares or black lines, the agent is a gray circle and the
@@ -24,8 +31,41 @@ import java.util.List;
  */
 public class GridWorldVisualizer {
 
+  private static BufferedImage upArrowImage = null;
+  private static BufferedImage downArrowImage = null;
+  private static BufferedImage rightArrowImage = null;
+  private static BufferedImage leftArrowImage = null;
+  private static BufferedImage blackUpArrowImage = null;
+  private static BufferedImage blackDownArrowImage = null;
+  private static BufferedImage blackRightArrowImage = null;
+  private static BufferedImage blackLeftArrowImage = null;
+
+  static {
+    try {
+      upArrowImage = ImageIO.read(new File("data/up-arrow.png"));
+      downArrowImage = ImageIO.read(new File("data/down-arrow.png"));
+      rightArrowImage = ImageIO.read(new File("data/right-arrow.png"));
+      leftArrowImage = ImageIO.read(new File("data/left-arrow.png"));
+      blackUpArrowImage = ImageIO.read(new File("data/black-up-arrow.png"));
+      blackDownArrowImage = ImageIO.read(new File("data/black-down-arrow.png"));
+      blackRightArrowImage = ImageIO.read(new File("data/black-right-arrow.png"));
+      blackLeftArrowImage = ImageIO.read(new File("data/black-left-arrow.png"));
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
+  }
+
+  /**
+   * Sets the Q learning agent to enable visualization of Q-Values.
+   *
+   * @param aqLearning the Q learning agent
+   */
+  public static void setQLearning(final QLearning aqLearning) {
+    qLearning = aqLearning;
+  }
+
   // dependency inserted by PlotTest in order to visualize the Q-values
-  public static QLearning qLearning;
+  private static QLearning qLearning;
 
   private GridWorldVisualizer() {
     // do nothing
@@ -155,20 +195,28 @@ public class GridWorldVisualizer {
           boolean drawNorthWall = false;
           boolean drawEastWall = false;
 
-          if (this.map[i][j] == 1) {
+          switch (this.map[i][j]) {
+            case 1:
+              float rx = i * width;
+              float ry = cHeight - height - j * height;
+              g2.fill(new Rectangle2D.Float(rx, ry, width, height));
+              break;
 
-            float rx = i * width;
-            float ry = cHeight - height - j * height;
+            case 2:
+              drawNorthWall = true;
+              break;
 
-            g2.fill(new Rectangle2D.Float(rx, ry, width, height));
+            case 3:
+              drawEastWall = true;
+              break;
 
-          } else if (this.map[i][j] == 2) {
-            drawNorthWall = true;
-          } else if (this.map[i][j] == 3) {
-            drawEastWall = true;
-          } else if (this.map[i][j] == 4) {
-            drawNorthWall = true;
-            drawEastWall = true;
+            case 4:
+              drawNorthWall = true;
+              drawEastWall = true;
+              break;
+
+            default:
+              break;
           }
 
           int left = (int) (i * width);
@@ -182,9 +230,110 @@ public class GridWorldVisualizer {
           }
 
           if (qLearning != null && this.map[i][j] == 0) {
-            final List<QValue> qValues = qLearning.qValues(state);
+            double northQValue = 0.0;
+            double southQValue = 0.0;
+            double eastQValue = 0.0;
+            double westQValue = 0.0;
+
+            final State gridState = new GridWorldState(new GridAgent(
+                    i, // x
+                    j), // y
+                    new GridLocation(10, 10, "loc0")); // terminal location
+
+            //  {
+            //    agent (agent): {
+            //      x: {1}
+            //      y: {9}
+            //    }
+            //    loc0 (location): {
+            //      x: {10}
+            //      y: {10}
+            //      type: {0}
+            //    }
+            //  }
+            //System.out.println("gridState: " + gridState);
+            final List<QValue> qValues = qLearning.qValues(gridState);
             for (final QValue qValue : qValues) {
-              System.out.println("x: " + i + ", y: " + j + ", action: " + qValue.a + ", " + qValue.q);
+//              if (i > 8 && j > 8) {
+//                System.out.println("x: " + i + ", y: " + j + ", action: " + qValue.a + ", " + qValue.q);
+//              }
+              switch (qValue.a.actionName()) {
+                case "north":
+                  northQValue = qValue.q;
+                  break;
+
+                case "south":
+                  southQValue = qValue.q;
+                  break;
+
+                case "east":
+                  eastQValue = qValue.q;
+                  break;
+
+                case "west":
+                  westQValue = qValue.q;
+                  break;
+
+                default:
+                  assert false;
+              }
+            }
+            boolean isNorthArrow = false;
+            boolean isSouthArrow = false;
+            boolean isEastArrow = false;
+            boolean isWestArrow = false;
+            if (northQValue > southQValue && northQValue > eastQValue && northQValue > westQValue) {
+              isNorthArrow = true;
+            } else if (southQValue > northQValue && southQValue > eastQValue && southQValue > westQValue) {
+              isSouthArrow = true;
+            } else if (eastQValue > northQValue && eastQValue > southQValue && eastQValue > westQValue) {
+              isEastArrow = true;
+            } else if (westQValue > northQValue && westQValue > southQValue && westQValue > eastQValue) {
+              isWestArrow = true;
+            }
+            if (isNorthArrow) {
+//              System.out.println("north arrow, width: " + width + ", height: " + height);
+//              for (final QValue qValue : qValues) {
+//                System.out.println("  x: " + i + ", y: " + j + ", action: " + qValue.a + ", " + qValue.q);
+//              }
+              g2.drawImage(
+                      upArrowImage, // img
+                      null, // op
+                      left, // x
+                      top); // y
+
+            } else if (isSouthArrow) {
+//              System.out.println("south arrow");
+//              for (final QValue qValue : qValues) {
+//                System.out.println("  x: " + i + ", y: " + j + ", action: " + qValue.a + ", " + qValue.q);
+//              }
+              g2.drawImage(
+                      downArrowImage, // img
+                      null, // op
+                      left, // x
+                      top); // y
+
+            } else if (isEastArrow) {
+//              System.out.println("east arrow");
+//              for (final QValue qValue : qValues) {
+//                System.out.println("  x: " + i + ", y: " + j + ", action: " + qValue.a + ", " + qValue.q);
+//              }
+              g2.drawImage(
+                      rightArrowImage, // img
+                      null, // op
+                      left, // x
+                      top); // y
+
+            } else if (isWestArrow) {
+//              System.out.println("west arrow");
+//              for (final QValue qValue : qValues) {
+//                System.out.println("  x: " + i + ", y: " + j + ", action: " + qValue.a + ", " + qValue.q);
+//              }
+              g2.drawImage(
+                      leftArrowImage, // img
+                      null, // op
+                      left, // x
+                      top); // y
             }
           }
 
@@ -258,6 +407,7 @@ public class GridWorldVisualizer {
         g2.fill(new Rectangle2D.Float(rx, ry, width, height));
       } else {
         g2.fill(new Ellipse2D.Float(rx, ry, width, height));
+
       }
 
     }

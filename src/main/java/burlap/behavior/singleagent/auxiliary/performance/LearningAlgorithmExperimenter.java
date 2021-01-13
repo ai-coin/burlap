@@ -304,7 +304,7 @@ public class LearningAlgorithmExperimenter {
 
     LearningAgent agent = agentFactory.generateAgent();
     if (agent instanceof QLearning) {
-      GridWorldVisualizer.qLearning = (QLearning) agent;
+      GridWorldVisualizer.setQLearning((QLearning) agent);
     }
 
     this.plotter.toggleDataCollection(true); //turn it back on to begin
@@ -319,18 +319,18 @@ public class LearningAlgorithmExperimenter {
       if (visualExplorer != null) {
         visualExplorer.init();
       }
-      if (agent instanceof QLearning) {
-        final QLearning qLearning = (QLearning) agent;
-        final Policy learningPolicy = qLearning.learningPolicy;
-        qLearning.setLearningPolicy(new GreedyQPolicy(qLearning));
-
-        agent.runLearningEpisode(this.environmentSever);
-
-        qLearning.setLearningPolicy(learningPolicy);
-        this.plotter.endEpisode();
-        this.environmentSever.resetEnvironment();
-        visualExplorer.init();
-      }
+//      if (agent instanceof QLearning) {
+//        final QLearning qLearning = (QLearning) agent;
+//        final Policy learningPolicy = qLearning.learningPolicy;
+//        qLearning.setLearningPolicy(new GreedyQPolicy(qLearning));
+//
+//        agent.runLearningEpisode(this.environmentSever);
+//
+//        qLearning.setLearningPolicy(learningPolicy);
+//        this.plotter.endEpisode();
+//        this.environmentSever.resetEnvironment();
+//        visualExplorer.init();
+//      }
     }
 
     this.plotter.endTrial();

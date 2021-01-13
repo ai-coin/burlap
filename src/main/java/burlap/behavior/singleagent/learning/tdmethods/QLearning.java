@@ -443,16 +443,17 @@ public class QLearning extends MDPSolver implements QProvider, LearningAgent, Pl
         eo = env.executeAction(action);
         if (visualExplorer != null) {
           // visualize the agent's actions in a grid world
+          //System.out.println("action: " + action);
           visualExplorer.executeAction(action);
           if (learningPolicy instanceof GreedyQPolicy) {
             try {
-              Thread.sleep(250);
+              Thread.sleep(1000);
             } catch (InterruptedException ex) {
               //ignore
             }
           } else {
             try {
-              Thread.sleep(100);
+              Thread.sleep(10);
             } catch (InterruptedException ex) {
               //ignore
             }

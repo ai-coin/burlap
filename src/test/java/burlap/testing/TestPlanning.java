@@ -31,101 +31,103 @@ import static burlap.behavior.policy.PolicyUtils.rollout;
 import static burlap.domain.singleagent.gridworld.GridWorldDomain.PF_AT_LOCATION;
 
 public class TestPlanning {
-	public static final double delta = 0.000001;
-	GridWorldDomain gw;
-	OOSADomain domain;
-	StateConditionTest goalCondition;
-	SimpleHashableStateFactory hashingFactory;
-	@Before
-	public void setup() {
-		this.gw = new GridWorldDomain(11, 11);
-		this.gw.setMapToFourRooms();
-		this.gw.setRf(new UniformCostRF());
-		TerminalFunction tf = new SinglePFTF(PropositionalFunction.findPF(gw.generatePfs(), PF_AT_LOCATION));
-		this.gw.setTf(tf);
-		this.domain = this.gw.generateDomain();
-		this.goalCondition = new TFGoalCondition(tf);
-		this.hashingFactory = new SimpleHashableStateFactory();
-	}
-	
-	@Test
-	public void testBFS() {
-		GridWorldState initialState = new GridWorldState(new GridAgent(0, 0), new GridLocation(10, 10, 0, "loc0"));
 
-		DeterministicPlanner planner = new BFS(this.domain, this.goalCondition, this.hashingFactory);
-		planner.planFromState(initialState);
-		Policy p = new SDPlannerPolicy(planner);
-		Episode analysis = rollout(p, initialState, domain.getModel());
-		this.evaluateEpisode(analysis, true);
-	}
-	
-	@Test
-	public void testDFS() {
-		GridWorldState initialState = new GridWorldState(new GridAgent(0, 0), new GridLocation(10, 10, 0, "loc0"));
-		
-		DeterministicPlanner planner = new DFS(this.domain, this.goalCondition, this.hashingFactory, -1 , true);
-		planner.planFromState(initialState);
-		Policy p = new SDPlannerPolicy(planner);
-		Episode analysis = rollout(p, initialState, domain.getModel());
-		this.evaluateEpisode(analysis);
-	}
-	
-	@Test
-	public void testAStar() {
-		GridWorldState initialState = new GridWorldState(new GridAgent(0, 0), new GridLocation(10, 10, 0, "loc0"));
-		
-		Heuristic mdistHeuristic = new Heuristic() {
-			
-			@Override
-			public double h(State s) {
+  public static final double delta = 0.000001;
+  GridWorldDomain gw;
+  OOSADomain domain;
+  StateConditionTest goalCondition;
+  SimpleHashableStateFactory hashingFactory;
 
-				GridAgent agent = ((GridWorldState)s).agent;
-				GridLocation location = ((GridWorldState)s).locations.get(0);
+  @Before
+  public void setup() {
+    this.gw = new GridWorldDomain(11, 11);
+    this.gw.setMapToFourRooms();
+    this.gw.setRf(new UniformCostRF());
+    TerminalFunction tf = new SinglePFTF(PropositionalFunction.findPF(gw.generatePfs(), PF_AT_LOCATION));
+    this.gw.setTf(tf);
+    this.domain = this.gw.generateDomain();
+    this.goalCondition = new TFGoalCondition(tf);
+    this.hashingFactory = new SimpleHashableStateFactory();
+  }
 
-				//get agent position
-				int ax = agent.x;
-				int ay = agent.y;
-				
-				//get location position
-				int lx = location.x;
-				int ly = location.y;
-				
-				//compute Manhattan distance
-				double mdist = Math.abs(ax-lx) + Math.abs(ay-ly);
-				
-				return -mdist;
-			}
-		};
-		
-		//provide A* the heuristic as well as the reward function so that it can keep
-		//track of the actual cost
-		DeterministicPlanner planner = new AStar(domain, goalCondition,
-			hashingFactory, mdistHeuristic);
-		planner.planFromState(initialState);
-		Policy p = new SDPlannerPolicy(planner);
-		
-		Episode analysis = PolicyUtils.rollout(p, initialState, domain.getModel());
-		this.evaluateEpisode(analysis, true);
-	}
-	
-	public void evaluateEpisode(Episode analysis) {
-		this.evaluateEpisode(analysis, false);
-	}
-	
-	public void evaluateEpisode(Episode analysis, Boolean expectOptimal) {
-		if (expectOptimal) {
-			Assert.assertEquals(this.gw.getHeight() + this.gw.getWidth() - 1, analysis.stateSequence.size());
-			Assert.assertEquals(analysis.stateSequence.size()-1, analysis.actionSequence.size());
-			Assert.assertEquals(analysis.actionSequence.size(), analysis.rewardSequence.size());
-			Assert.assertEquals(-analysis.actionSequence.size(), analysis.discountedReturn(1.0), TestPlanning.delta);
-		}
+  @Test
+  public void testBFS() {
+    GridWorldState initialState = new GridWorldState(new GridAgent(0, 0), new GridLocation(10, 10, 0, "loc0"));
 
-		Assert.assertEquals(true, domain.getModel().terminal(analysis.stateSequence.get(analysis.stateSequence.size()-1)));
-		Assert.assertEquals(true, this.goalCondition.satisfies(analysis.stateSequence.get(analysis.stateSequence.size()-1)));
-	}
-	
-	@After
-	public void teardown() {
-		
-	}
+    DeterministicPlanner planner = new BFS(this.domain, this.goalCondition, this.hashingFactory);
+    planner.planFromState(initialState);
+    Policy p = new SDPlannerPolicy(planner);
+    Episode analysis = rollout(p, initialState, domain.getModel());
+    this.evaluateEpisode(analysis, true);
+  }
+
+  @Test
+  public void testDFS() {
+    GridWorldState initialState = new GridWorldState(new GridAgent(0, 0), new GridLocation(10, 10, 0, "loc0"));
+
+    DeterministicPlanner planner = new DFS(this.domain, this.goalCondition, this.hashingFactory, -1, true);
+    planner.planFromState(initialState);
+    Policy p = new SDPlannerPolicy(planner);
+    Episode analysis = rollout(p, initialState, domain.getModel());
+    this.evaluateEpisode(analysis);
+  }
+
+  @Test
+  public void testAStar() {
+    GridWorldState initialState = new GridWorldState(new GridAgent(0, 0), new GridLocation(10, 10, 0, "loc0"));
+
+    Heuristic mdistHeuristic = new Heuristic() {
+
+      @Override
+      public double h(State s) {
+
+        GridAgent agent = ((GridWorldState) s).agent;
+        GridLocation location = ((GridWorldState) s).locations.get(0);
+
+        //get agent position
+        int ax = agent.x;
+        int ay = agent.y;
+
+        //get location position
+        int lx = location.x;
+        int ly = location.y;
+
+        //compute Manhattan distance
+        double mdist = Math.abs(ax - lx) + Math.abs(ay - ly);
+
+        return -mdist;
+      }
+    };
+
+    //provide A* the heuristic as well as the reward function so that it can keep
+    //track of the actual cost
+    DeterministicPlanner planner = new AStar(domain, goalCondition,
+            hashingFactory, mdistHeuristic);
+    planner.planFromState(initialState);
+    Policy p = new SDPlannerPolicy(planner);
+
+    Episode analysis = PolicyUtils.rollout(p, initialState, domain.getModel());
+    this.evaluateEpisode(analysis, true);
+  }
+
+  public void evaluateEpisode(Episode analysis) {
+    this.evaluateEpisode(analysis, false);
+  }
+
+  public void evaluateEpisode(Episode analysis, Boolean expectOptimal) {
+    if (expectOptimal) {
+      Assert.assertEquals(this.gw.getHeight() + this.gw.getWidth() - 1, analysis.stateSequence.size());
+      Assert.assertEquals(analysis.stateSequence.size() - 1, analysis.actionSequence.size());
+      Assert.assertEquals(analysis.actionSequence.size(), analysis.rewardSequence.size());
+      Assert.assertEquals(-analysis.actionSequence.size(), analysis.discountedReturn(1.0), TestPlanning.delta);
+    }
+
+    Assert.assertEquals(true, domain.getModel().terminal(analysis.stateSequence.get(analysis.stateSequence.size() - 1)));
+    Assert.assertEquals(true, this.goalCondition.satisfies(analysis.stateSequence.get(analysis.stateSequence.size() - 1)));
+  }
+
+  @After
+  public void teardown() {
+
+  }
 }
